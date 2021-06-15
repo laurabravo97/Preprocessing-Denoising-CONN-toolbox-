@@ -1,0 +1,143 @@
+Preprocessing and Denoising batch scripts for the CONN toolbox. Retrieved and adapted from https://web.conn-toolbox.org/resources/conn_batch  
+
+%%Preprocessing Data set 1 (ABIDE I, University of Leuven data set):
+
+cd C:\fMRI_Data\Leuven_1 
+NSUBJECTS=29; 
+cwd=pwd;
+FUNCTIONAL_FILE=cellstr(conn_dir('rest.nii.gz'));
+STRUCTURAL_FILE=cellstr(conn_dir('mprage.nii.gz'));
+if rem(length(FUNCTIONAL_FILE),NSUBJECTS),error('mismatch number of functional files %n', length(FUNCTIONAL_FILE));end
+if rem(length(STRUCTURAL_FILE),NSUBJECTS),error('mismatch number of anatomical files %n', length(FUNCTIONAL_FILE));end
+nsessions=length(FUNCTIONAL_FILE)/NSUBJECTS;
+FUNCTIONAL_FILE=reshape(FUNCTIONAL_FILE,[NSUBJECTS,nsessions]);
+STRUCTURAL_FILE=STRUCTURAL_FILE(1:NSUBJECTS);
+disp([num2str(size(FUNCTIONAL_FILE,1)),' subjects']);
+disp([num2str(size(FUNCTIONAL_FILE,2)),' sessions']);
+TR=1.7; % Repetition time
+ 
+%% Prepares batch structure
+clear batch;
+batch.filename=fullfile(cwd,'asd_Leuven2.mat'); 
+ 
+
+% CONN Setup.preprocessing                             (realignment/coregistration/segmentation/normalization/smoothing)
+batch.Setup.isnew=1;
+batch.Setup.nsubjects=NSUBJECTS;
+batch.Setup.RT=TR;                               % UI TR (seconds)
+batch.Setup.functionals=repmat({{}},[NSUBJECTS,1]);       % Point to functional volumes for each subject/session
+for nsub=1:NSUBJECTS
+    for nses=1:nsessions
+        batch.Setup.functionals{nsub}{nses}{1}=FUNCTIONAL_FILE{nsub,nses}; 
+    end
+end %note: each subject's data is defined by three sessions and one single (4d) file per session
+batch.Setup.structurals=STRUCTURAL_FILE;                  % Point to anatomical volumes for each subject
+nconditions=nsessions;                                  % treats each session as a different condition (comment the following three lines and lines 84-86 below if you do not wish to analyze between-session differences)
+if nconditions==1
+    batch.Setup.conditions.names={'rest'};
+    for ncond=1,for nsub=1:NSUBJECTS,for nses=1:nsessions,              batch.Setup.conditions.onsets{ncond}{nsub}{nses}=0; batch.Setup.conditions.durations{ncond}{nsub}{nses}=inf;end;end;end     % rest condition (all sessions)
+else
+    batch.Setup.conditions.names=[{'rest'}, arrayfun(@(n)sprintf('Session%d',n),1:nconditions,'uni',0)];
+    for ncond=1,for nsub=1:1,for nses=1:nsessions,              batch.Setup.conditions.onsets{ncond}{nsub}{nses}=0; batch.Setup.conditions.durations{ncond}{nsub}{nses}=inf;end;end;end     % rest condition (all sessions)
+    for ncond=1:nconditions,for nsub=1:1,for nses=1:nsessions,  batch.Setup.conditions.onsets{1+ncond}{nsub}{nses}=[];batch.Setup.conditions.durations{1+ncond}{nsub}{nses}=[]; end;end;end
+    for ncond=1:nconditions,for nsub=1:1,for nses=ncond,        batch.Setup.conditions.onsets{1+ncond}{nsub}{nses}=0; batch.Setup.conditions.durations{1+ncond}{nsub}{nses}=inf;end;end;end % session-specific conditions
+end
+batch.Setup.preprocessing.steps='default_mni';
+batch.Setup.preprocessing.sliceorder='ascending';
+batch.Setup.preprocessing.fwhm=5; % UI, smoothing kernel
+batch.Setup.preprocessing.art_thresholds=[5,0.9]; % outlier detector, set to default
+batch.Setup.outputfiles=[0,1,0]; % writing of denoised data as nifti 
+batch.Setup.done=1;
+batch.Setup.overwrite='Yes';
+batch.Setup.rois.files{1}= 'C:\Users\Laura\Dropbox\Modules BICN\Research Project\MarsTPJParcellation\MarsTPJParcellation\TPJ_thr25_2mm.nii';
+batch.Setup.rois.files{2}= 'C:\conn19c\conn\rois\atlas.nii';
+batch.Setup.rois.files{3}= 'C:\conn19c\conn\rois\networks.nii';
+% uncomment the following 3 lines if you prefer to run one step at a time:
+conn_batch(batch); % runs Preprocessing and Setup steps only
+
+
+%% DENOISING step
+% CONN Denoising                                    
+% Default options (uses White Matter+CSF+realignment+scrubbing+conditions as confound regressors); see conn_batch for additional options
+
+batch.Denoising.filter=[0.009, 0.08];                 % frequency filter (band-pass values, in Hz)
+batch.Denoising.done=1;
+batch.Denoising.overwrite='Yes';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%Preprocessing Data set 2 (ABIDE II, Barrow Neurological Institute data set):
+
+cd C:\fMRI_Data\BNI 
+NSUBJECTS=58; 
+cwd=pwd;
+FUNCTIONAL_FILE=cellstr(conn_dir('rest.nii.gz'));
+STRUCTURAL_FILE=cellstr(conn_dir('mprage.nii.gz'));
+if rem(length(FUNCTIONAL_FILE),NSUBJECTS),error('mismatch number of functional files %n', length(FUNCTIONAL_FILE));end
+if rem(length(STRUCTURAL_FILE),NSUBJECTS),error('mismatch number of anatomical files %n', length(FUNCTIONAL_FILE));end
+nsessions=length(FUNCTIONAL_FILE)/NSUBJECTS;
+FUNCTIONAL_FILE=reshape(FUNCTIONAL_FILE,[NSUBJECTS,nsessions]);
+STRUCTURAL_FILE=STRUCTURAL_FILE(1:NSUBJECTS);
+disp([num2str(size(FUNCTIONAL_FILE,1)),' subjects']);
+disp([num2str(size(FUNCTIONAL_FILE,2)),' sessions']);
+TR=3; % Repetition time
+ 
+%% Prepares batch structure
+clear batch;
+batch.filename=fullfile(cwd,'asd_BNI.mat'); 
+ 
+
+% CONN Setup.preprocessing                             (realignment/coregistration/segmentation/normalization/smoothing)
+batch.Setup.isnew=1;
+batch.Setup.nsubjects=NSUBJECTS;
+batch.Setup.RT=TR;                               % UI TR (seconds)
+batch.Setup.functionals=repmat({{}},[NSUBJECTS,1]);       % Point to functional volumes for each subject/session
+for nsub=1:NSUBJECTS
+    for nses=1:nsessions
+        batch.Setup.functionals{nsub}{nses}{1}=FUNCTIONAL_FILE{nsub,nses}; 
+    end
+end %note: each subject's data is defined by three sessions and one single (4d) file per session
+batch.Setup.structurals=STRUCTURAL_FILE;                  % Point to anatomical volumes for each subject
+nconditions=nsessions;                                  % treats each session as a different condition (comment the following three lines and lines 84-86 below if you do not wish to analyze between-session differences)
+if nconditions==1
+    batch.Setup.conditions.names={'rest'};
+    for ncond=1,for nsub=1:NSUBJECTS,for nses=1:nsessions,              batch.Setup.conditions.onsets{ncond}{nsub}{nses}=0; batch.Setup.conditions.durations{ncond}{nsub}{nses}=inf;end;end;end     % rest condition (all sessions)
+else
+    batch.Setup.conditions.names=[{'rest'}, arrayfun(@(n)sprintf('Session%d',n),1:nconditions,'uni',0)];
+    for ncond=1,for nsub=1:1,for nses=1:nsessions,              batch.Setup.conditions.onsets{ncond}{nsub}{nses}=0; batch.Setup.conditions.durations{ncond}{nsub}{nses}=inf;end;end;end     % rest condition (all sessions)
+    for ncond=1:nconditions,for nsub=1:1,for nses=1:nsessions,  batch.Setup.conditions.onsets{1+ncond}{nsub}{nses}=[];batch.Setup.conditions.durations{1+ncond}{nsub}{nses}=[]; end;end;end
+    for ncond=1:nconditions,for nsub=1:1,for nses=ncond,        batch.Setup.conditions.onsets{1+ncond}{nsub}{nses}=0; batch.Setup.conditions.durations{1+ncond}{nsub}{nses}=inf;end;end;end % session-specific conditions
+end
+batch.Setup.preprocessing.steps='default_mni';
+batch.Setup.preprocessing.sliceorder='ascending';
+batch.Setup.preprocessing.fwhm=5; % UI, smoothing kernel
+batch.Setup.preprocessing.art_thresholds=[5,0.9]; % outlier detector, set to default
+batch.Setup.outputfiles=[0,1,0]; % writing of denoised data as nifti 
+batch.Setup.done=1;
+batch.Setup.overwrite='Yes';
+batch.Setup.rois.files{1}= 'C:\Users\Laura\Dropbox\Modules BICN\Research Project\MarsTPJParcellation\MarsTPJParcellation\TPJ_thr25_2mm.nii';
+batch.Setup.rois.files{2}= 'C:\conn19c\conn\rois\atlas.nii';
+batch.Setup.rois.files{3}= 'C:\conn19c\conn\rois\networks.nii';
+% uncomment the following 3 lines if you prefer to run one step at a time:
+conn_batch(batch); % runs Preprocessing and Setup steps only
+
+
+%% DENOISING step
+% CONN Denoising                                    
+% Default options (uses White Matter+CSF+realignment+scrubbing+conditions as confound regressors); see conn_batch for additional options
+
+batch.Denoising.filter=[0.009, 0.08];                 % frequency filter (band-pass values, in Hz)
+batch.Denoising.done=1;
+batch.Denoising.overwrite='Yes';
