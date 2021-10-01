@@ -1,6 +1,10 @@
-Preprocessing and Denoising batch scripts for the CONN toolbox. Retrieved and adapted from https://web.conn-toolbox.org/resources/conn_batch  
+Preprocessing and Denoising batch scripts CONN toolbox (conn_batch_workshop_nyudataset.m; retrieved from https://www.nitrc.org/frs/?group_id=279) 
 
-%%Preprocessing Data set 1 (ABIDE I, University of Leuven data set):
+https://web.conn-toolbox.org/resources/conn_batch  
+
+
+
+%%Preprocessing exploratory dataset (ABIDE I, University of Leuven data set):
 
 cd C:\fMRI_Data\Leuven_1 
 NSUBJECTS=29; 
@@ -49,21 +53,25 @@ batch.Setup.preprocessing.art_thresholds=[5,0.9]; % outlier detector, set to def
 batch.Setup.outputfiles=[0,1,0]; % writing of denoised data as nifti 
 batch.Setup.done=1;
 batch.Setup.overwrite='Yes';
-batch.Setup.rois.files{1}= 'C:\Users\Laura\Dropbox\Modules BICN\Research Project\MarsTPJParcellation\MarsTPJParcellation\TPJ_thr25_2mm.nii';
-batch.Setup.rois.files{2}= 'C:\conn19c\conn\rois\atlas.nii';
-batch.Setup.rois.files{3}= 'C:\conn19c\conn\rois\networks.nii';
-% uncomment the following 3 lines if you prefer to run one step at a time:
-conn_batch(batch); % runs Preprocessing and Setup steps only
+batch.Setup.rois.files{1}= 'C:\Users\Laura\Dropbox\Modules BICN\Research Project\mask_rvaTPJ.nii';
+batch.Setup.rois.files{2}= 'C:\Users\Laura\Dropbox\Modules BICN\Research Project\mask_rvpTPJ.nii';
+batch.Setup.rois.files{3}= 'C:\conn19c\conn\rois\atlas.nii';
+batch.Setup.rois.files{4}= 'C:\conn19c\conn\rois\networks.nii';
+% uncomment the following line if you prefer to run one step at a time:
+% conn_batch(batch); % runs Preprocessing and Setup steps only
 
 
 %% DENOISING step
 % CONN Denoising                                    
 % Default options (uses White Matter+CSF+realignment+scrubbing+conditions as confound regressors); see conn_batch for additional options
 
-batch.Denoising.filter=[0.009, 0.08];                 % frequency filter (band-pass values, in Hz)
+batch.Denoising.filter=[0.01, 0.08];                 % frequency filter (band-pass values, in Hz)
 batch.Denoising.done=1;
 batch.Denoising.overwrite='Yes';
 
+conn_batch(batch);
+
+quit
 
 
 
@@ -75,10 +83,7 @@ batch.Denoising.overwrite='Yes';
 
 
 
-
-
-
-%%Preprocessing Data set 2 (ABIDE II, Barrow Neurological Institute data set):
+%%Preprocessing Replication dataset (ABIDE II, Barrow Neurological Institute data set):
 
 cd C:\fMRI_Data\BNI 
 NSUBJECTS=58; 
@@ -127,17 +132,22 @@ batch.Setup.preprocessing.art_thresholds=[5,0.9]; % outlier detector, set to def
 batch.Setup.outputfiles=[0,1,0]; % writing of denoised data as nifti 
 batch.Setup.done=1;
 batch.Setup.overwrite='Yes';
-batch.Setup.rois.files{1}= 'C:\Users\Laura\Dropbox\Modules BICN\Research Project\MarsTPJParcellation\MarsTPJParcellation\TPJ_thr25_2mm.nii';
-batch.Setup.rois.files{2}= 'C:\conn19c\conn\rois\atlas.nii';
-batch.Setup.rois.files{3}= 'C:\conn19c\conn\rois\networks.nii';
-% uncomment the following 3 lines if you prefer to run one step at a time:
-conn_batch(batch); % runs Preprocessing and Setup steps only
+batch.Setup.rois.files{1}= 'C:\Users\Laura\Dropbox\Modules BICN\Research Project\mask_rvaTPJ.nii';
+batch.Setup.rois.files{2}= 'C:\Users\Laura\Dropbox\Modules BICN\Research Project\mask_rvpTPJ.nii';
+batch.Setup.rois.files{3}= 'C:\conn19c\conn\rois\atlas.nii';
+batch.Setup.rois.files{4}= 'C:\conn19c\conn\rois\networks.nii';
+% uncomment the following line if you prefer to run one step at a time:
+%conn_batch(batch); % runs Preprocessing and Setup steps only
 
 
 %% DENOISING step
 % CONN Denoising                                    
 % Default options (uses White Matter+CSF+realignment+scrubbing+conditions as confound regressors); see conn_batch for additional options
 
-batch.Denoising.filter=[0.009, 0.08];                 % frequency filter (band-pass values, in Hz)
+batch.Denoising.filter=[0.01, 0.08];                 % frequency filter (band-pass values, in Hz)
 batch.Denoising.done=1;
 batch.Denoising.overwrite='Yes';
+
+conn_batch(batch);
+
+quit
