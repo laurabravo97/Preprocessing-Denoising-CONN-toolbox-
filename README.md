@@ -8,4 +8,4 @@ Nieto-Castanon, A. (2020). Handbook of functional connectivity Magnetic Resonanc
 
 CONN toolbox --> http://www.nitrc.org/projects/conn. 
 
-CONN manual --> https://sites.google.com/view/conn/resources/manuals.
+CONN manual --> https://web.conn-toolbox.org/resources/documentation/manual
